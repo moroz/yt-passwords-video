@@ -15,7 +15,7 @@ type UserStore interface {
 }
 
 func NewUserStore(db *sqlx.DB) UserStore {
-	return userStore{db}
+	return userStore{db: db}
 }
 
 const userColumns = `id, email, password_hash, inserted_at, updated_at`
