@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -15,12 +16,12 @@ func readPublicKey() (ed25519.PublicKey, error) {
 	filename := filepath.Join(config.JWTKeypairDirectory, config.JWTPubkeyFilename)
 	bytes, err := os.ReadFile(filename)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("readPublicKey: %w", err)
 	}
 	block, _ := pem.Decode(bytes)
 	parsed, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("readPublicKey: %w", err)
 	}
 	if key, ok := parsed.(ed25519.PublicKey); ok {
 		return key, nil

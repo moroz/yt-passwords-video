@@ -1,6 +1,10 @@
 package types
 
-import "time"
+import (
+	"net/mail"
+	"strings"
+	"time"
+)
 
 type User struct {
 	ID           int       `db:"id" json:"id"`
@@ -16,10 +20,22 @@ type RegisterUserParams struct {
 	PasswordConfirmation string `json:"passwordConfirmation"`
 }
 
-func (p RegisterUserParams) Validate() ValidationResult {
+func validateEmail(email string) bool {
+	parsed, err := mail.ParseAddress(email)
+	if err != nil || parsed.Name != "" {
+		return false
+	}
+	domain := strings.Split(parsed.Address, "@")[1]
+	return strings.Contains(domain, ".")
+}
+
+func (p *RegisterUserParams) Validate() ValidationResult {
 	var result ValidationResult
+	p.Email = strings.TrimSpace(p.Email)
 	if p.Email == "" {
 		result.Add("email", "can't be blank")
+	} else if !validateEmail(p.Email) {
+		result.Add("email", "is invalid")
 	}
 	if p.Password == "" {
 		result.Add("password", "can't be blank")

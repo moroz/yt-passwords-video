@@ -19,4 +19,4 @@ var defaultKeypairDirectory = filepath.Join(RootPath, "priv")
 
 var JWTKeypairDirectory = GetEnvWithDefault("JWT_KEYPAIR_DIRECTORY", defaultKeypairDirectory)
 var JWTPrivkeyFilename = GetEnvWithDefault("JWT_PRIVKEY_FILENAME", "access.key")
-var JWTPubkeyFilename = GetEnvWithDefault("JWT_PRIVKEY_FILENAME", "access.pub")
+var JWTPubkeyFilename = GetEnvWithDefault("JWT_PUBKEY_FILENAME", "access.pub")
