@@ -1,3 +1,6 @@
 export JWT_KEYPAIR_DIRECTORY="$(pwd)/priv"
 export JWT_PRIVKEY_FILENAME=access.key
 export JWT_PUBKEY_FILENAME=access.pub
+
+export PGDATABASE=yt_auth_dev
+export DATABASE_URL="postgres://postgres:postgres@localhost:5432/${PGDATABASE}?sslmode=disable"

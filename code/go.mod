@@ -4,6 +4,7 @@ go 1.21.4
 
 require (
 	github.com/alexedwards/argon2id v1.0.0
+	github.com/go-chi/chi/v5 v5.0.12
 	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/stretchr/testify v1.8.4

@@ -5,3 +5,6 @@ gen.keypair:
 
 test:
 	go test -v ./...
+
+db.create:
+	createdb ${DATABASE_NAME}
