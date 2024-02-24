@@ -1,0 +1,3 @@
+export JWT_KEYPAIR_DIRECTORY="$(pwd)/priv"
+export JWT_PRIVKEY_FILENAME=access.key
+export JWT_PUBKEY_FILENAME=access.pub

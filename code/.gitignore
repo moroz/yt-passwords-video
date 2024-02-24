@@ -1,0 +1,4 @@
+server
+.envrc
+priv/*.key
+priv/*.pub
