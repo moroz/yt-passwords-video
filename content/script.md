@@ -16,38 +16,42 @@ Initialize a Go module using the command `go mod init`, followed by a "module pa
 This is going to be `github.com/`, your Github username, `/goma`.
 My Github username is my surname, Moroz, so I initialize the project using `go mod init github.com/moroz/goma`.
 Initialize a Git repository using `git init`.
-Stage all changes in the working directory using `git add .`, and finally, create an initial commit using `git commit -m "Initial commit"`.
+Stage all changes in the working directory (`git add .`), and finally, create an initial commit (`git commit -m "Initial commit"`).
 
 Now, let's try to connect to a database.
-In order to be able to connect to a database, we need to do two things: we need to define a connection string, and we need to install some Go libraries.
+We're going to have to do two things: install some Go libraries, and write some Go code.
 Let's start with the easy part: installing libraries.
-I'm going to install sqlx, which is a wrapper over the Go standard library `database/sql` package.
-On the website of sqlx, I scroll down to this snippet and copy-and-paste it in the terminal.
-Then, install `lib/pq`, which is a database driver for Postgres.
+The first library I'm going to install is sqlx, which is a wrapper over the Go standard library `database/sql` package.
+Since we want to connect to a Postgres database, we also have to install `lib/pq`, which is a database driver for Postgres.
+On the website of sqlx, I scroll down to this snippet and copy-and-paste it into the terminal.
+Then, do the same thing for `lib/pq`.
 
-Now, we're going to need to define a connection string.
-If you know how to connect to a Postgres database using a connection string, you can skip to the next section.
+Now, we're going to need to set up a database and define a connection string.
+If you know how to connect to a Postgres database using a connection URL, you can skip to the next section.
 
-First, make sure that you can actually connect to Postgres using `psql`.
+First, make sure that you can connect to Postgres using `psql`.
 When you type `psql` in the command line, you should get connected to the default database, which is named the same as your system user.
 
 If you have just installed Postgres for the first time, you can run into an error saying that the "role does not exist."
-You can solve it by running this command.
-What this does is it runs a command as the `postgres` system user to create a database role.
-The `-s` flag means that you want to create a superuser.
-`$(whoami)` will be replaced with your username.
+You can solve it by running the command that is shown on the screen (`sudo su postgres -c "createuser -s $(whoami)"`).
+The first part of the command means that the command in quotes will be executed as the user "postgres".
+The middle means "create a Postgres superuser".
+The last part is an expression that your shell should replace with your username.
 
-If this command succeeds and you try to open a `psql` command line, you're going to run into another error, saying that the database does not exist.
-You can create the default database using the command `createdb`.
+If this command succeeds and you try to open a `psql` command line, you're going to run into another error, saying that your default database does not exist.
+You can create it by simply calling the command `createdb`.
 Then you should be able to open a Postgres console using `psql`.
-Now let's set a password for the user "postgres".
-Still in the `psql` prompt, run `alter user postgres with password 'postgres';`.
-Make sure to end your command with a semicolon.
-If it says `ALTER ROLE`, it means that the command was successful.
 
-Now, let's create a database for the application.
-Since the project is called "goma", I'm going to call the development database "goma_dev".
+Now let's set a password for the user "postgres".
+Still in the `psql` prompt, type `alter user postgres with password 'postgres';`.
+Make sure to end your command with a semicolon (;).
+If you see the message `ALTER ROLE`, it means that you have successfully changed the password.
+
+Now, let's create a database for our application.
+Since the project is called "goma", I'm going to call the database "goma_dev".
 Creating the database is as simple as running `createdb goma_dev` in the terminal.
+In the terminal, we can very easily connect to this database by typing `psql goma_dev`, but if we want to make a connection using Go, we need to write a connection string.
+
 Now, we can try to connect to the database with a connection string by typing `psql`, double quote, `postgres`, colon, slash slash, `postgres`, colon, `postgres@localhost`, slash, `goma_dev`, question mark, `sslmode` equals `disable`, double quote.
 This means that we want to connect as user `postgres`, with password `postgres`, to the server running on `localhost`, to the database `goma_dev`.
 The last part means that we want to disable encryption, because we don't need it when we connect to a database on the same machine.
