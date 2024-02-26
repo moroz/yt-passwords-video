@@ -21,21 +21,22 @@ Stage all changes in the working directory (`git add .`), and finally, create an
 Now, let's try to connect to a database.
 We're going to have to do two things: install some Go libraries, and write some Go code.
 Let's start with the easy part: installing libraries.
-The first library I'm going to install is sqlx, which is a wrapper over the Go standard library `database/sql` package.
+The first library I'm going to install is sqlx, which is a wrapper over the standard library `database/sql` package.
 Since we want to connect to a Postgres database, we also have to install `lib/pq`, which is a database driver for Postgres.
 On the website of sqlx, I scroll down to this snippet and copy-and-paste it into the terminal.
 Then, do the same thing for `lib/pq`.
 
 Now, we're going to need to set up a database and define a connection string.
-If you know how to connect to a Postgres database using a connection URL, you can skip to the next section.
+If you already know how to connect to a Postgres database using a connection URL, you can skip to the next section.
 
 First, make sure that you can connect to Postgres using `psql`.
 When you type `psql` in the command line, you should get connected to the default database, which is named the same as your system user.
+In my case, it is my first name, karol.
 
-If you have just installed Postgres for the first time, you can run into an error saying that the "role does not exist."
-You can solve it by running the command that is shown on the screen (`sudo su postgres -c "createuser -s $(whoami)"`).
+If you have just installed Postgres for the first time, you can run into this error saying that the "role does not exist."
+You can solve it by running the command shown on the screen (`sudo su postgres -c "createuser -s $(whoami)"`).
 The first part of the command means that the command in quotes will be executed as the user "postgres".
-The middle means "create a Postgres superuser".
+The middle part means "create a Postgres superuser".
 The last part is an expression that your shell should replace with your username.
 
 If this command succeeds and you try to open a `psql` command line, you're going to run into another error, saying that your default database does not exist.
