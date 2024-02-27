@@ -40,22 +40,26 @@ The middle part means "create a Postgres superuser".
 The last part is an expression that your shell should replace with your username.
 
 If this command succeeds and you try to open a `psql` command line, you're going to run into another error, saying that your default database does not exist.
-You can create it by simply calling the command `createdb`.
+You can create the default database by simply calling the command `createdb`.
 Then you should be able to open a Postgres console using `psql`.
 
 Now let's set a password for the user "postgres".
-Still in the `psql` prompt, type `alter user postgres with password 'postgres';`.
-Make sure to end your command with a semicolon (;).
+In general, when connecting to a database on your own computer, the username and password don't really matter.
+On the other hand, it is a common practice to use the default `postgres` user with the password `postgres`.
+Still in the `psql` prompt, type the command shown on the screen `alter user postgres with password 'postgres';`.
+Make sure to wrap the password in single quotes and to end the command with a semicolon (;).
 If you see the message `ALTER ROLE`, it means that you have successfully changed the password.
 
-Now, let's create a database for our application.
-Since the project is called "goma", I'm going to call the database "goma_dev".
-Creating the database is as simple as running `createdb goma_dev` in the terminal.
-In the terminal, we can very easily connect to this database by typing `psql goma_dev`, but if we want to make a connection using Go, we need to write a connection string.
+Finally, let's create a database for the application.
+Since the project is called "goma", I'm going to call the database "goma_dev", that's "dev" for "development".
+The command to create a database is `createdb`, followed by the name of the database you want to create.
+So I type `createdb goma_dev`. If there is no output, it means that the database has been successfully created.
 
-Now, we can try to connect to the database with a connection string by typing `psql`, double quote, `postgres`, colon, slash slash, `postgres`, colon, `postgres@localhost`, slash, `goma_dev`, question mark, `sslmode` equals `disable`, double quote.
-This means that we want to connect as user `postgres`, with password `postgres`, to the server running on `localhost`, to the database `goma_dev`.
-The last part means that we want to disable encryption, because we don't need it when we connect to a database on the same machine.
+In the terminal, we can very easily connect to this database by typing `psql goma_dev`, but if we want to make a connection using Go, we need to write a connection string.
+On the screen, you can see a connection string in URL format.
+This string specifies that we want to connect to the database server at `localhost`, using the username `postgres`, and the password `postgres`.
+We want to connect to the database called `goma_dev`, and the part after the question mark means that we want to disable encryption, because we're not going to need it in development.
+If you type `psql` in the command line, and then type this connection string, you should be able to connect to the database, just like before.
 
 We could hard-code the connection string in the source files, but a better way to set it is using environment variables.
 In development, I use a command-line tool called `direnv` to manage my environment.
