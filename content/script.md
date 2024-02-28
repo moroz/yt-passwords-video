@@ -60,9 +60,30 @@ On the screen, you can see a connection string in URL format.
 This string specifies that we want to connect to the database server at `localhost`, using the username `postgres`, and the password `postgres`.
 We want to connect to the database called `goma_dev`, and the part after the question mark means that we want to disable encryption, because we're not going to need it in development.
 If you type `psql` in the command line, and then type this connection string, you should be able to connect to the database, just like before.
+On some shells, you may have to wrap the URL in double quotes.
 
-We could hard-code the connection string in the source files, but a better way to set it is using environment variables.
-In development, I use a command-line tool called `direnv` to manage my environment.
+At long last, we can write some Go code. Make sure you are in the correct working directory, which is where you have initialized a Go module.
+Create a file named main.go and open it in a code editor.
+Define `package main` and `func main()`. Paste the connection URL and define it as a string constant.
+We're going to have to import `sqlx` and `pq` in this file. If your code editor has automatic imports, it should handle importing `sqlx` for you, but you need to add the `pq` import yourself and prefix it with an underscore. This is because the package is not directly used in this file.
+In the main function, connect to the database using `sqlx.MustConnect`. This function will panic if it doesn't manage to connect to the database.
+Now, let's make a simple SQL query to check that everything works. Define a string variable called `version`.
+Using the `db.QueryRow` method, execute a SQL query and read the result into the `version` variable, passing a reference to the `.Scan` method.
+If this method returned an error, log it to the standard output and exit. Otherwise, print the `version` variable.
+If you run this project (git tag `step-1`), you should see the full version string of your Postgres installation.
+
+Now, obviously, hard-coding the connection string inside the source code is not the best way going forward, so let's move it out to environment variables.
+In development, I like to use a tool called `direnv` to manage my environment variables.
 `direnv` configures environment variables based on a configuration file called `.envrc`.
 If you configure `direnv` correctly, it's going to evaluate the `.envrc` file every time you cd into the project directory and it will set your environment variables.
 I won't be going into a detailed explanation on how to set up `direnv` on your machine, but you can read the friendly manual at https://direnv.net.
+
+Create a file named `.envrc` in the working directory. Inside this file, type `export DATABASE_URL=`, and then paste the connection URL.
+If you have configured `direnv` correctly, it should now display an error message, asking you to run `direnv allow`. If you haven't, you can still set the correct environment variables by running `source .envrc` in the shell.
+You can check the value of `DATABASE_URL` by running `echo $DATABASE_URL` in the terminal. Remember to prefix the variable name with a dollar sign.
+
+In the `main.go` file, define a function called `MustGetEnv`, taking a string argument and returning a string.
+Read the value of an environment variable using `os.Getenv`. If the value is an empty string, log an error message and terminate the program.
+Otherwise, return the value.
+Now, replace the hardcoded connection string with a call to `MustGetEnv("DATABASE_URL")`. Since we are now using a function call, the value is no longer a stack-allocated constant, so we have to replace `const` with `var`.
+When you run the program (git tag `step-2`), the output should remain the same.
