@@ -111,6 +111,5 @@ Now, the command to apply or revert the migrations is quite complicated, and I d
 This is a configuration file for a tool called `make`, and it is an easy way to define common commands.
 In this file, I'm first going to define a task named `check-env`.
 Using the `test` command, I check if the value of `DATABASE_URL` is non-empty.
-Then, I add the task `db.migrate`, which depends on `check-env`.
-This task runs the 
-
+Then, I add the tasks `db.migrate` and `db.rollback`, which depend on `check-env`.
+Now, in the terminal, run `make db.migrate`.
