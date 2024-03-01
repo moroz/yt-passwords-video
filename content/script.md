@@ -14,10 +14,12 @@ Not only does it begin with "go," the name of the programming language we are go
 
 Initialize a Go module using the command `go mod init`, followed by a "module path."
 This is going to be `github.com/`, your Github username, `/goma`.
-My Github username is my surname, Moroz, so I initialize the project using `go mod init github.com/moroz/goma`.
+<!-- delete this line from the video -->
+<!-- My Github username is my surname, Moroz, so I initialize the project using `go mod init github.com/moroz/goma`. -->
 Initialize a Git repository using `git init`.
 Stage all changes in the working directory (`git add .`), and finally, create an initial commit (`git commit -m "Initial commit"`).
 
+<!-- re-record this line -->
 Now, let's try to connect to a database.
 We're going to have to do two things: install some Go libraries, and write some Go code.
 Let's start with the easy part: installing libraries.
