@@ -59,8 +59,7 @@ In the terminal, we can very easily connect to this database by typing `psql gom
 On the screen, you can see a connection string in URL format.
 This string specifies that we want to connect to the database server at `localhost`, using the username `postgres`, and the password `postgres`.
 We want to connect to the database called `goma_dev`, and the part after the question mark means that we want to disable encryption, because we're not going to need it in development.
-If you type `psql` in the command line, and then type this connection string, you should be able to connect to the database, just like before.
-On some shells, you may have to wrap the URL in double quotes.
+Now, in the command line, type `psql`, then paste this connection string and wrap it in double quotes. You should be able to connect to the database, just like before.
 
 At long last, we can write some Go code. Make sure you are in the correct working directory, which is where you have initialized a Go module.
 Create a file named main.go and open it in a code editor.
@@ -68,13 +67,13 @@ Define `package main` and `func main()`. Paste the connection URL and define it 
 We're going to have to import `sqlx` and `pq` in this file. If your code editor has automatic imports, it should handle importing `sqlx` for you, but you need to add the `pq` import yourself and prefix it with an underscore. This is because the package is not directly used in this file.
 In the main function, connect to the database using `sqlx.MustConnect`. This function will panic if it doesn't manage to connect to the database.
 Now, let's make a simple SQL query to check that everything works. Define a string variable called `version`.
-Using the `db.QueryRow` method, execute a SQL query and read the result into the `version` variable, passing a reference to the `.Scan` method.
+Execute a SQL query and scan the result into the version variable.
 If this method returned an error, log it to the standard output and exit. Otherwise, print the `version` variable.
 If you run this project (git tag `step-1`), you should see the full version string of your Postgres installation.
 
-Now, obviously, hard-coding the connection string inside the source code is not the best way going forward, so let's move it out to environment variables.
-In development, I like to use a tool called `direnv` to manage my environment variables.
-`direnv` configures environment variables based on a configuration file called `.envrc`.
+Now, obviously, hard-coding the connection string inside the source code is not the best way going forward, so let's use environment variables instead.
+In development, I like to use a tool called `direnv`.
+`direnv` lets you define environment variables in a file called `.envrc`.
 If you configure `direnv` correctly, it's going to evaluate the `.envrc` file every time you cd into the project directory and it will set your environment variables.
 I won't be going into a detailed explanation on how to set up `direnv` on your machine, but you can read the friendly manual at https://direnv.net.
 
