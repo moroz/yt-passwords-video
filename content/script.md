@@ -80,9 +80,10 @@ In development, I like to use a tool called `direnv` to manage my environment va
 If you configure `direnv` correctly, it's going to evaluate the `.envrc` file every time you cd into the project directory and it will set your environment variables.
 I won't be going into a detailed explanation on how to set up `direnv` on your machine, but you can read the friendly manual at https://direnv.net.
 
-Create a file named `.envrc` in the working directory. Inside this file, type `export DATABASE_URL=`, and then paste the connection URL.
+Create a file named `.envrc` in the working directory. Inside this file, type `export DATABASE_URL=`, and then paste the connection URL. Then, set `PGDATABASE` to `goma_dev`. Save this file and open a new shell.
 If you have configured `direnv` correctly, it should now display an error message, asking you to run `direnv allow`. If you haven't, you can still set the correct environment variables by running `source .envrc` in the shell.
 You can check the value of `DATABASE_URL` by running `echo $DATABASE_URL` in the terminal. Remember to prefix the variable name with a dollar sign.
+The `PGDATABASE` variable sets the default database for Postgres, so if you type `psql` now, you should be connected directly to the database `goma_dev`.
 
 In the `main.go` file, define a function called `MustGetEnv`, taking a string argument and returning a string.
 Read the value of an environment variable using `os.Getenv`. If the value is an empty string, log an error message and terminate the program.
@@ -109,9 +110,18 @@ Finally, add two columns named "inserted_at", and "updated_at". These columns re
 Remember to double-check that everything in this file is syntactically correct, because the `golang-migrate` tool is actually quite primitive, and if there are any errors, it will lock the database and you will have to fix it manually.
 Now, open the "down" migration file. Here, just type `drop table users;` and save. There is no need to revert the first statement in the "up" migration as it doesn't really influence the overall database structure.
 
-Now, the command to apply or revert the migrations is quite complicated, and I don't want to have to type it every time, so I'm going to create a file called "Makefile", with a capital M in front and all the remaining letters are small.
+Now, the command to apply or revert the migrations is quite complicated, and I don't want to have to type it every time, so I'm going to create a file called "Makefile".
 This is a configuration file for a tool called `make`, and it is an easy way to define common commands.
-In this file, I'm first going to define a task named `check-env`.
-Using the `test` command, I check if the value of `DATABASE_URL` is non-empty.
-Then, I add the tasks `db.migrate` and `db.rollback`, which depend on `check-env`.
+Here we can define tasks for applying and rolling back migrations, like so.
+You may notice that both commands make use of the `DATABASE_URL` environment variable. Consequently, we have to make sure the variable is set before we can run the migrations.
+We can achieve this by defining a dynamic target, like this.
+Then, we can add a guard as a dependency to the two other targets.
+Now, this can look a bit arcane, but this `test` command checks that the string you pass to it is not empty. If the test fails, the part after the double pipe operator is executed, which prints an error message and exits the process.
+The `@` at the beginning tells `make` not to print out the command as it is executed. This would be too verbose.
+
+We can see how it works by running the guard in the terminal. When I run `make guard-DATABASE_URL`, it passes, because the `DATABASE_URL` variable is set and not empty.
+When I run it with a variable that is not set, I get an error message and `make` exits with a non-zero exit code.
+
 Now, in the terminal, run `make db.migrate`.
+If you have set everything up correctly, the command should run your migration.
+Connect to the database, type `\d users`, and press enter. As we can see, we now have a `users` table, and the columns are exactly the way we wanted.
