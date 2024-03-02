@@ -79,48 +79,42 @@ In development, I like to use a tool called `direnv`.
 If you configure `direnv` correctly, it's going to evaluate the `.envrc` file every time you cd into the project directory and it will set your environment variables.
 I won't be going into a detailed explanation on how to set up `direnv` on your machine, but you can read the friendly manual at https://direnv.net.
 
-Create a file named `.envrc` in the working directory. Inside this file, type `export DATABASE_URL=`, and then paste the connection URL. Then, set `PGDATABASE` to `goma_dev`. Save this file and open a new shell.
+Create a file named `.envrc` in the working directory. In this file, we can define variables using standard shell syntax.
+Let's export two variables. Set `PGDATABASE` to `goma_dev`. Then, set `DATABASE_URL` to the connection URL that we have previously hard-coded in the source code.
+Save this file and open a new shell.
 If you have configured `direnv` correctly, it should now display an error message, asking you to run `direnv allow`. If you haven't, you can still set the correct environment variables by running `source .envrc` in the shell.
-You can check the value of `DATABASE_URL` by running `echo $DATABASE_URL` in the terminal. Remember to prefix the variable name with a dollar sign.
+You can check the value of `DATABASE_URL` by running `echo $DATABASE_URL` in the terminal.
 The `PGDATABASE` variable sets the default database for Postgres, so if you type `psql` now, you should be connected directly to the database `goma_dev`.
 
 In the `main.go` file, define a function called `MustGetEnv`, taking a string argument and returning a string.
-Read the value of an environment variable using `os.Getenv`. If the value is an empty string, log an error message and terminate the program.
+Inside this function, read the value of an environment variable using `os.Getenv`. If the value is an empty string, log an error message and terminate the program.
 Otherwise, return the value.
 Now, replace the hardcoded connection string with a call to `MustGetEnv("DATABASE_URL")`. Since we are now using a function call, the value is no longer a stack-allocated constant, so we have to replace `const` with `var`.
 When you run the program (git tag `step-2`), the output should remain the same.
 
 This is already looking great, but we can do even better by creating a database table and writing some data into it.
 In an application project, the best way to modify the database schema is using database migrations.
-These are essentially SQL scripts checked into version control that a migration tool will execute on the database in the correct order.
-We can use a tool called `golang-migrate` CLI. It's kind of a pain to install, but on Linux and Mac you can install it using Homebrew, by typing `brew install golang-migrate`. Other installation options are described on this website.
-Create a directory to store migrations at `db/migrations`.
-The command to generate a migration is shown on the screen. This instructs `golang-migrate` to create a migration script, with the `.sql` file extension, inside the `db/migrations` directory, and we're going to call it "create_users".
-If you execute this command, you should get two files, one ending with `.up.sql` and one ending with `.down.sql`.
-When you apply a migration script, the "up" script is executed, and when you revert one, the "down" script is executed.
+These are essentially SQL scripts checked into version control that a migration tool will execute in the correct order.
+We're going to use a tool called `goose`. It's a powerful migration tool written in Go. On the website of goose, scroll down to this snippet, starting with `go install`, copy it and paste it in your terminal.
+Then, create a directory to store migrations at `db/migrations`.
+Now, let's configure goose using environment variables. Once again, open the file `.envrc` and add three new variables.
+First, set the migration directory to `db/migrations`.
+Then, set the migration driver to `postgres`.
+Finally, set the `GOOSE_DBSTRING` to be equal to `DATABASE_URL`.
+Open a new terminal. If you are using direnv, run `direnv allow`, otherwise source the `.envrc` file.
+Now, create a migration using `goose create create_users sql`. Make sure to use a space between the name of the migration and "sql".
+This command will create a new file in the `db/migrations` directory. Open that file in your code editor.
+This file contains two sections, one named "up" for the changes we want to apply, and one named "down" for teardown instructions. The "down" section is optional.
 
-Open the "up" migration in your text editor.
-This statement will install a database extension called "citext", or "case-insensitive text".
-"Case-insensitive" means that capital letters are treated the same as small letters, just like in email addresses.
-Then, we are going to create a table named "users". We add an ID column, which is a 64-bit signed integer generated by the database, and will be the primary key for this table.
+In the "up" section, remove the default content and add this statement to install a database extension called `citext`.
+This extension provides a data type for "case-insensitive text". We're going to use it for email addresses.
+Then, we are going to create a table named "users".
+We add an ID column, which is a 64-bit signed integer generated by the database, and will be the primary key for this table.
 Add an email column, which is a "citext", or "case-insensitive text", cannot be null, and must be unique.
 Then, a column named "password_hash", which is going to securely store the user's password.
-Finally, add two columns named "inserted_at", and "updated_at". These columns represent the time when the record was created and updated. Both columns should be non-nullable, and both should default to the current datetime in the UTC timezone.
-Remember to double-check that everything in this file is syntactically correct, because the `golang-migrate` tool is actually quite primitive, and if there are any errors, it will lock the database and you will have to fix it manually.
-Now, open the "down" migration file. Here, just type `drop table users;` and save. There is no need to revert the first statement in the "up" migration as it doesn't really influence the overall database structure.
+Finally, add two columns named "inserted_at", and "updated_at". These columns represent the time when the record was created and updated. Both columns should be non-nullable, and both should default to the current UTC datetime.
+In the "down" section, replace the default content with `drop table users;` and save the file.
 
-Now, the command to apply or revert the migrations is quite complicated, and I don't want to have to type it every time, so I'm going to create a file called "Makefile".
-This is a configuration file for a tool called `make`, and it is an easy way to define common commands.
-Here we can define tasks for applying and rolling back migrations, like so.
-You may notice that both commands make use of the `DATABASE_URL` environment variable. Consequently, we have to make sure the variable is set before we can run the migrations.
-We can achieve this by defining a dynamic target, like this.
-Then, we can add a guard as a dependency to the two other targets.
-Now, this can look a bit arcane, but this `test` command checks that the string you pass to it is not empty. If the test fails, the part after the double pipe operator is executed, which prints an error message and exits the process.
-The `@` at the beginning tells `make` not to print out the command as it is executed. This would be too verbose.
-
-We can see how it works by running the guard in the terminal. When I run `make guard-DATABASE_URL`, it passes, because the `DATABASE_URL` variable is set and not empty.
-When I run it with a variable that is not set, I get an error message and `make` exits with a non-zero exit code.
-
-Now, in the terminal, run `make db.migrate`.
+Now, in the terminal, run `goose up`.
 If you have set everything up correctly, the command should run your migration.
 Connect to the database, type `\d users`, and press enter. As we can see, we now have a `users` table, and the columns are exactly the way we wanted.
