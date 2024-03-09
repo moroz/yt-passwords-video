@@ -1,6 +1,5 @@
 In this video I'm going to show you how I approach setting up a Go Web application.
 For persistence, we will be using a PostgreSQL database with a library called sqlx.
-In this video, we won't be touching the HTTP stack yet, but we will implement password authentication and JWTs.
 
 Before we begin, make sure you have the latest Go toolchain installed.
 As of this recording, the latest version is 1.22.0.
@@ -14,12 +13,9 @@ Not only does it begin with "go," the name of the programming language we are go
 
 Initialize a Go module using the command `go mod init`, followed by a "module path."
 This is going to be `github.com/`, your Github username, `/goma`.
-<!-- delete this line from the video -->
-<!-- My Github username is my surname, Moroz, so I initialize the project using `go mod init github.com/moroz/goma`. -->
 Initialize a Git repository using `git init`.
 Stage all changes in the working directory (`git add .`), and finally, create an initial commit (`git commit -m "Initial commit"`).
 
-<!-- re-record this line -->
 Now, let's try to connect to a database.
 We're going to have to do two things: install some Go libraries, and write some Go code.
 Let's start with the easy part: installing libraries.
@@ -118,3 +114,9 @@ In the "down" section, replace the default content with `drop table users;` and 
 Now, in the terminal, run `goose up`.
 If you have set everything up correctly, the command should run your migration.
 Connect to the database, type `\d users`, and press enter. As we can see, we now have a `users` table, and the columns are exactly the way we wanted.
+
+When I started preparing this video two weeks ago, I was initially hoping to be able to show you much more than this.
+However, this proved to be a much more daunting task than I could have imagined.
+In the next videos, I want to cover password authentication using argon2, issuing access tokens signed with asymmetric keys, one-time passwords with TOTP, and WebAuthn, AKA passkeys.
+If there is anything in particular you would like me to cover, please let me know in the comment section.
+I hope you learned something, and thanks for watching.
